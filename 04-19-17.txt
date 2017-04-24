@@ -1,0 +1,23 @@
+Min Max
+
+value(s){
+	if s is terminal_node : return utility(s)
+	if s is max_node : return max_value(s)
+	if s is min_node : return min_value(s)
+}
+
+max_value(s){
+	m = -infinity
+	for a, s' in successors		// s' = result(s, a) // a -> action
+		v = value(s')
+		m = max(m, v)
+	return m
+}
+
+min_value(s){
+	m = +infinity
+	for a, s' in successors // s' = result(s, a) // a -> action
+		v = value(s')
+		m = min(m, v)
+	return m
+}
