@@ -35,7 +35,6 @@ public class Game {
 				tiles[a][b] = new JButton();
 				tiles[a][b].setBorder(new CompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(0, 0, 0, 0)));
 				tiles[a][b].setFocusPainted(false);
-				tiles[a][b].setForeground(Color.YELLOW);
 				tiles[a][b].setFont(new Font("Tahoma", Font.BOLD, 30));
 				tiles[a][b].setBackground(Color.BLACK);
 				tiles[a][b].addActionListener(new ActionListener () {
@@ -87,7 +86,7 @@ public class Game {
 		frame.setVisible(true);
 	}
 
-	public static void reset(JButton[][] tiles){
+	public static void reset (JButton[][] tiles) {
 		ttt = new TicTacToe();
 		counter = 1;
 		for (int i=0; i<dim; i++) {
@@ -98,6 +97,36 @@ public class Game {
 		}
 	}
 
+	public int value (State s) {
+		if (s.getTerminalNode()) {
+			return utility(s);
+		} else if (s.getMaxNode()) {
+			return max_value(s);
+		} else if (s.getMinNode()) {
+			return min_value(s);
+		}
+		return 0;
+	}
+
+	public int utility(State s) {
+		return s.getUtility();
+	}
+
+	public int max_value(State s) {
+		int m = -99999;
+		// for (; ; ) {
+			
+		// }
+		return m;
+	}
+
+	public int min_value(State s) {
+		int m = 99999;
+		// for (; ; ) {
+			
+		// }
+		return m;
+	}
 	/*
 	value(s){
 		if s is terminal_node : return utility(s)
