@@ -1,141 +1,181 @@
-public class TicTacToe extends Thread{
-	private final int dim = 3;
-	public enum Moves{B, X, O}; // B - Blank
-	private Moves[][] tile;
-	private int moveCount;
-	private Moves winner;
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.LinkedList;
 
+public class TicTacToe {
+	
+	private final int SIZE = 3;
+	private JButton[][] tiles;
+	private char[][] config;
+	
+	private char currentPlayer;
+	
 	public TicTacToe(){
-		createBoard();
+		this.tiles = new JButton[SIZE][SIZE];
+		this.config = new char[SIZE][SIZE];
+		this.currentPlayer = 'X';
+		init();
 	}
 
-	private void createBoard(){
-		this.tile = new Moves[dim][dim];
-
-		for (int i=0; i<dim; i++) {
-			for (int j=0; j<dim; j++) {
-				tile[i][j] = Moves.B;
+	public void init(){
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				this.config[i][j] = '-';
 			}
 		}
 	}
 
-	public void move(int x, int y, Moves m) {
-		if (tile[x][y] == Moves.B) {
-			moveCount++;
-			tile[x][y] = m;
-			checkWinner(x, y, m);
+	public void addComponentsToPane (JFrame frame) {
+
+		Container c = frame.getContentPane();
+		JPanel mainPanel = new JPanel();
+		JPanel topPanel = new JPanel();
+		JPanel centerPanel = new JPanel();
+		JPanel bottomPanel = new JPanel();
+		JPanel leftPanel = new JPanel();
+		JPanel rightPanel = new JPanel();
+
+		JLabel header = new JLabel("TicTacToe", SwingConstants.CENTER);
+		header.setFont(new Font("Tahoma", Font.PLAIN, 40));
+		
+		mainPanel.setLayout(new BorderLayout(30, 30));
+		
+		centerPanel.setLayout(new GridLayout(SIZE, SIZE, 10, 10));
+		
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				final int a = i;
+				final int b = j;
+				tiles[a][b] = new JButton();
+				tiles[a][b].setBorder(new CompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(0, 0, 0, 0)));
+				tiles[a][b].setFocusPainted(false);
+				tiles[a][b].setFont(new Font("Tahoma", Font.BOLD, 30));
+				tiles[a][b].setBackground(Color.BLACK);
+				tiles[a][b].addActionListener(new ActionListener () {
+					public void actionPerformed (ActionEvent e) {
+						
+						tiles[a][b].setEnabled(false);
+						tiles[a][b].setText(String.valueOf(currentPlayer));
+						toggle(a, b, currentPlayer);
+						State state = new State(config, currentPlayer);
+						aiTurn(tiles, state, currentPlayer);
+						// turn = 0;
+						// State state = new State(config, turn);
+						// state.setMaxNode();
+						// aiturn(tiles, state, mainPanel);
+					}
+				});
+
+				centerPanel.add(tiles[a][b]);
+			}
+		}
+		
+		topPanel.add(header);
+
+		mainPanel.add(topPanel, BorderLayout.PAGE_START);
+		mainPanel.add(leftPanel, BorderLayout.LINE_START);
+		mainPanel.add(centerPanel, BorderLayout.CENTER);
+		mainPanel.add(rightPanel, BorderLayout.LINE_END);
+		mainPanel.add(bottomPanel, BorderLayout.PAGE_END);
+		c.add(mainPanel);
+
+		chooseFirst();
+	}
+
+	public void createAndShowGUI () {
+		JFrame frame = new JFrame("TicTacToe");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setPreferredSize(new Dimension(700, 700));
+		addComponentsToPane(frame);
+		frame.setResizable(false);
+		frame.pack();
+		frame.setVisible(true);
+	}
+
+	public void chooseFirst() {
+		String[] options = {"AI", "Player"};
+
+		int n = JOptionPane.showOptionDialog(null, "Who'll start?", "Choose Your Turn!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		
+		if (n == -1) System.exit(0);
+		else if (n == 0) {
+			State state = new State(config, currentPlayer);
+			aiTurn();
 		}
 	}
 
-	// Checks if there is a winner or call for a draw.
-	private void checkWinner(final int x, final int y, final Moves m) {
-		Thread[] checker = new Thread[4];
+	public void toggle(int x, int y, char c) {
+		if (config[x][y] == '-') {
+			config[x][y] = c;
+			if (checkWin() || checkDraw()) resetGame();
+			switchPlayer();
+		}
+	}
+	public void switchPlayer(){
+		if (currentPlayer == 'X') {
+			currentPlayer = 'O';
+		} else {
+			currentPlayer = 'X';
+		}
+	}
+	public boolean checkWin(){
+		return (checkRows() || checkCols() || checkDiags());
+	}
+	public boolean checkRows(){
+		for (int i = 0; i < SIZE; i++) {
+			if (checkRowCol(config[i][0], config[i][1], config[i][2])) return true;
+		}
+		return false;
+	}
+	public boolean checkCols(){
+		for (int i = 0; i < SIZE; i++) {
+			if (checkRowCol(config[0][i], config[1][i], config[2][i])) return true;
+		}
+		return false;
+	}
+	public boolean checkDiags(){
+		return (checkRowCol(config[0][0], config[1][1], config[2][2]) || checkRowCol(config[0][2], config[1][1], config[2][0]));
+	}
+	public boolean checkRowCol(char c1, char c2, char c3){
+		if (c1 != '-' && (c1 == c2) && (c2 == c3)) {
+			JOptionPane.showMessageDialog(null, c1 + " wins!");
+			return true;
+		}
+		return false;
+	}
 
-		checker[0] = new Thread() {
-			@Override
-			public void run() {
-				if(winner == null) {
-					winner = checkRow(x, y, m);
+	public boolean checkDraw(){
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				if (config[i][j] == '-') {
+					return false;
 				}
 			}
-		};
-		checker[1] = new Thread() {
-			@Override
-			public void run() {
-				if(winner == null) {
-					winner = checkCol(x, y, m);
-				}
-			}
-		};
-		checker[2] = new Thread() {
-			@Override
-			public void run() {
-				if(winner == null) {
-					winner = checkDiag(x, y, m);
-				}
-			}
-		};
-		checker[3] = new Thread() {
-			@Override
-			public void run() {
-				if(winner == null) {
-					winner = checkOtherDiag(x, y, m);
-				}
-			}
-		};
-
-		// Starts the threads.
-		for(int i = 0; i < 4; i++) {
-			try {
-				checker[i].start();
-			} catch(Exception e) {}
 		}
-		for(int i = 0; i < 4; i++) {
-			try {
-				checker[i].join();
-			} catch(Exception e) {}
-		}
+		JOptionPane.showMessageDialog(null, "Draw!");
+		return true;
 	}
 
-	private synchronized Moves checkRow(int x, int y, Moves m) {
-		// Checks the row
-		for(int i = 0; i < dim; i++) {
-			if(tile[x][i] != m) {
-				return null;
+	public void resetGame () {
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				tiles[i][j].setEnabled(true);
+				tiles[i][j].setText("");
+				config[i][j] = '-';
 			}
 		}
-		return m;
+		chooseFirst();
 	}
+	
+	// public void aiTurn(JButton[][] tiles, State state, char c) {
+	// 	State utility = value(state);
 
-	private synchronized Moves checkCol(int x, int y, Moves m) {
-		// Checks the column
-		for(int i = 0; i < dim; i++) {
-			if(tile[i][y] != m) {
-				return null;
-			}
-		}
-		return m;
-	}
+	// 	// System.out.println("Value: " + utility.value + "\nRow: " + utility.row + "\nColumn: " + utility.column);
+	// 	tiles[utility.row][utility.column].setText("O");
+	// 	tiles[utility.row][utility.column].setEnabled(false);
+	// 	toggle(utility.row, utility.column, c);
+	// }
 
-	private synchronized Moves checkDiag(int x, int y, Moves m) {
-		// Checks the diagonal
-		for(int i = 0; i < dim; i++) {
-			if(tile[i][i] != m) {
-				return null;
-			}
-		}
-		return m;
-	}
-
-	private synchronized Moves checkOtherDiag(int x, int y, Moves m) {
-		//Checks the other diagonal
-		for(int i = 0; i < dim; i++) {
-			if(tile[i][dim - 1 - i] != m) {
-				return null;
-			}
-		}
-		return m;
-	}
-
-	// Returns the winner of the round.
-	public Moves getWinner() {
-		return this.winner;
-	}
-
-	// Returns the number of moves both players have made.
-	public int getMoveCount() {
-		return this.moveCount;
-	}
-
-	// Prints the 3x3 grid on the console.
-	public void printTile() {
-		System.out.println("\t\t+---+---+---+");
-		for(int i = 0; i < dim; i++) {
-			System.out.print("\t\t| ");
-			for(int j = 0; j < dim; j++) {
-				System.out.print(tile[i][j] + " | ");
-			}
-			System.out.println("\n\t\t+---+---+---+");
-		}
-	}
 }

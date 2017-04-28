@@ -1,11 +1,11 @@
 public class Main {
 	
-	private static Game g = new Game();
+	private static TicTacToe ttt = new TicTacToe();
 
 	public static void main (String[] args) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable () {
 			public void run () {
-				g.createAndShowGUI();
+				ttt.createAndShowGUI();
 			}
 		});
 	}
