@@ -18,12 +18,16 @@ public class MinMax {
 		state.generateActions();
 
 		for (State s : state.getSuccessors()) {
-			v = value(s);
-			m = max(m, v.value);
-			// System.out.println("V: " + v.value + "\nM: " + m);
+			State v = value(s);
+
+			// v.getParent()
+
+			if (v > m) {
+				m = v;
+				returnState = s;
+			}
 		}
-		// Utility utility = new Utility(m, v.row, v.column);
-		return utility;
+		return returnState;
 	}
 
 	public State min_value(State state) {
@@ -33,19 +37,14 @@ public class MinMax {
 		state.generateActions();
 		
 		for (State s : state.getSuccessors()) {
-			v = value(s);
-			m = min(m, v.value);
+			State v = value(s);
+			// m = min(m, v.value);
+			if (v < m) {
+				m = v;
+				returnState = s;
+			}
 		}
-		// Utility utility = new Utility(m, v.row, v.column);
-		return utility;
-	}
-
-	public int min(int m, int v) {
-		return m < v ? m : v;
-	}
-
-	public int max(int m, int v) {
-		return m > v ? m : v;
+		return returnState;
 	}
 }
 

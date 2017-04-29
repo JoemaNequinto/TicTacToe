@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 public class TicTacToe {
 	
-	private final int SIZE = 3;
+	private static final int SIZE = 3;
 	private JButton[][] tiles;
 	private char[][] config;
 	
@@ -60,7 +60,12 @@ public class TicTacToe {
 						tiles[a][b].setText(String.valueOf(currentPlayer));
 						toggle(a, b, currentPlayer);
 						State state = new State(config, currentPlayer);
-						aiTurn(tiles, state, currentPlayer);
+						printState(state);
+						state.generateActions();
+						for (State s : state.getSuccessors()) {
+							printState(s);
+						}
+						// aiTurn(tiles, state, currentPlayer);
 						// turn = 0;
 						// State state = new State(config, turn);
 						// state.setMaxNode();
@@ -84,10 +89,20 @@ public class TicTacToe {
 		chooseFirst();
 	}
 
+	public void printState(State state){
+		System.out.println();
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				System.out.print(state.getBoard()[i][j]);
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
 	public void createAndShowGUI () {
 		JFrame frame = new JFrame("TicTacToe");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setPreferredSize(new Dimension(700, 700));
+		frame.setPreferredSize(new Dimension(500, 500));
 		addComponentsToPane(frame);
 		frame.setResizable(false);
 		frame.pack();
@@ -102,7 +117,7 @@ public class TicTacToe {
 		if (n == -1) System.exit(0);
 		else if (n == 0) {
 			State state = new State(config, currentPlayer);
-			aiTurn();
+			// aiTurn();
 		}
 	}
 
