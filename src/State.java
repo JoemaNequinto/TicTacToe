@@ -2,57 +2,62 @@ import java.util.LinkedList;
 
 public class State {
 	
-	private int dim = 3;
+	private int SIZE = 3;
 	private char[][] config;
 	
 	private State parent;
 	
-	private boolean terminal_node;
-	private boolean max_node;
-	private boolean min_node;
+	private boolean terminal_node = false;
+	private boolean max_node = false;
+	private boolean min_node = false;
 	
+	private char AI;
 	private char currentPlayer;
-	private int utilityX;
-	private int utilityO;
+	private int utility;
 	
 	private LinkedList<State> successors;
 	
-	public State(char[][] config, char currentPlayer) {
-		this.config = new char[dim][dim];
-		for (int i = 0; i < dim; i++) {
-			for (int j = 0; j < dim; j++) {
+	public State(char[][] config, char currentPlayer, char ai) {
+		this.config = new char[SIZE][SIZE];
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
 				this.config[i][j] = config[i][j];
 			}
 		}
+
+		this.AI = ai;
 		this.currentPlayer = currentPlayer;
-		this.terminal_node = false;
-		this.max_node = false;
-		this.min_node = false;
+		
+		if (currentPlayer == ai) {
+			this.max_node = true;
+		} else {
+			this.min_node = true;
+		}
 	}
 
 	/* turn = 1 - X, turn = 0 - O*/
 	public void generateActions() {
 		successors = new LinkedList<State>();
-		for (int i = 0; i < dim; i++) {
-			for (int j = 0; j < dim; j++) {
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
 				if (this.config[i][j] == '-') {
 					State state;
 					if (this.currentPlayer == 'X') {
-						state = new State(result(config, i, j, 'X'), 'O');
+						state = new State(result(config, i, j, 'X'), 'O', AI);
 						config[i][j] = '-';
 						if (state.checkWin() || state.checkDraw()) {
-							state.setTerminalNode()
+							state.setTerminalNode();
 						}
 						state.setParent(this);
 					} else {
-						state = new State(result(config, i, j, 'O'), 'X');
+						state = new State(result(config, i, j, 'O'), 'X', AI);
 						config[i][j] = '-';
 						if (state.checkWin() || state.checkDraw()) {
-							state.setTerminalNode()
+							state.setTerminalNode();
 						}
 						state.setParent(this);
 					}
-					successors.add(state);;
+					successors.add(state);
 				}
 
 			}
@@ -86,13 +91,10 @@ public class State {
 	public boolean checkRowCol(char c1, char c2, char c3){
 		if (c1 != '-' && (c1 == c2) && (c2 == c3)) {
 			// JOptionPane.showMessageDialog(null, c1 + " wins!");
-			if (c1 == 'X') {
-				utilityX = 1;
-				utilityO = -1;
-			}
-			else if (c1 == 'O') {
-				utilityO = 1;
-				utilityX = -1;
+			if (c1 == AI) {
+				setUtility(1);
+			} else {
+				setUtility(-1);
 			}
 			return true;
 		}
@@ -107,9 +109,7 @@ public class State {
 				}
 			}
 		}
-		// JOptionPane.showMessageDialog(null, "Draw!");
-		utilityX = 0;
-		utilityO = 0;
+		setUtility(0);
 		return true;
 	}
 
@@ -118,14 +118,11 @@ public class State {
 	public void setTerminalNode() {
 		this.terminal_node = true;
 	}
-	public void setMaxNode() {
-		this.max_node = true;
-	}
-	public void setMinNode() {
-		this.min_node = true;
-	}
 	public void setParent(State parent){
 		this.parent = parent;
+	}
+	public void setUtility(int utility){
+		this.utility = utility;
 	}
 
 	/* Getters */
@@ -135,9 +132,14 @@ public class State {
 	public boolean getMaxNode() {
 		return max_node;
 	}
-
 	public boolean getMinNode() {
 		return min_node;
+	}
+	public int getUtility() {
+		return utility;
+	}
+	public State getParent() {
+		return parent;
 	}
 	public char[][] getBoard() {
 		return config;

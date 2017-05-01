@@ -1,8 +1,8 @@
 public class MinMax {
 
-	public State value (State s) {
+	public static State value (State s) {
 		if (s.getTerminalNode()) {
-			return utility(s);
+			return s;
 		} else if (s.getMaxNode()) {
 			return max_value(s);
 		} else if (s.getMinNode()) {
@@ -11,7 +11,7 @@ public class MinMax {
 		return null;
 	}
 
-	public State max_value(State state) {
+	public static State max_value(State state) {
 		int m = -99999;
 		State returnState = null;
 		
@@ -20,17 +20,15 @@ public class MinMax {
 		for (State s : state.getSuccessors()) {
 			State v = value(s);
 
-			// v.getParent()
-
-			if (v > m) {
-				m = v;
+			if (v.getUtility() > m) {
+				m = v.getUtility();
 				returnState = s;
 			}
 		}
 		return returnState;
 	}
 
-	public State min_value(State state) {
+	public static State min_value(State state) {
 		int m = 99999;
 		State returnState = null;
 
@@ -38,9 +36,9 @@ public class MinMax {
 		
 		for (State s : state.getSuccessors()) {
 			State v = value(s);
-			// m = min(m, v.value);
-			if (v < m) {
-				m = v;
+			
+			if (v.getUtility() < m) {
+				m = v.getUtility();
 				returnState = s;
 			}
 		}

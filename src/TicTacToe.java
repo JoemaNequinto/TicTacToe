@@ -10,12 +10,13 @@ public class TicTacToe {
 	private JButton[][] tiles;
 	private char[][] config;
 	
+	private char PLAYER;
+	private char AI;
 	private char currentPlayer;
 	
 	public TicTacToe(){
 		this.tiles = new JButton[SIZE][SIZE];
 		this.config = new char[SIZE][SIZE];
-		this.currentPlayer = 'X';
 		init();
 	}
 
@@ -59,17 +60,11 @@ public class TicTacToe {
 						tiles[a][b].setEnabled(false);
 						tiles[a][b].setText(String.valueOf(currentPlayer));
 						toggle(a, b, currentPlayer);
-						State state = new State(config, currentPlayer);
+						switchPlayer();
+						State state = new State(config, currentPlayer, AI);
 						printState(state);
-						state.generateActions();
-						for (State s : state.getSuccessors()) {
-							printState(s);
-						}
-						// aiTurn(tiles, state, currentPlayer);
-						// turn = 0;
-						// State state = new State(config, turn);
-						// state.setMaxNode();
-						// aiturn(tiles, state, mainPanel);
+						aiMove(state);
+						switchPlayer();
 					}
 				});
 
@@ -110,22 +105,55 @@ public class TicTacToe {
 	}
 
 	public void chooseFirst() {
-		String[] options = {"AI", "Player"};
+		String[] options = {"Player", "AI"};
 
 		int n = JOptionPane.showOptionDialog(null, "Who'll start?", "Choose Your Turn!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-		
+		System.out.println(n);
 		if (n == -1) System.exit(0);
-		else if (n == 0) {
-			State state = new State(config, currentPlayer);
-			// aiTurn();
+		else if (n == 1) {
+			// AI first turn
+			
+			AI = 'X';
+			PLAYER = 'O';
+			currentPlayer = AI;
+			
+			State state = new State(config, currentPlayer, AI);
+			aiMove(state);
+			switchPlayer();
+
+		} else if (n == 0) {
+			// Player first turn
+			PLAYER = 'X';
+			AI = 'O';
+			currentPlayer = PLAYER;
 		}
 	}
-
+	public void updateConfig(State state){
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				config[i][j] = state.getBoard()[i][j];
+				if (state.getBoard()[i][j] != '-') {
+					tiles[i][j].setEnabled(false);
+					tiles[i][j].setText(String.valueOf(state.getBoard()[i][j]));
+				}
+			}
+		}
+		if (checkWin() || checkDraw()) System.exit(0);
+	}
+	public boolean equalBoard(State s1, State s2){
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				if (s1.getBoard()[i][j] != s2.getBoard()[i][j]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	public void toggle(int x, int y, char c) {
 		if (config[x][y] == '-') {
 			config[x][y] = c;
-			if (checkWin() || checkDraw()) resetGame();
-			switchPlayer();
+			if (checkWin() || checkDraw()) System.exit(0);
 		}
 	}
 	public void switchPlayer(){
@@ -173,24 +201,36 @@ public class TicTacToe {
 		return true;
 	}
 
-	public void resetGame () {
-		for (int i = 0; i < SIZE; i++) {
-			for (int j = 0; j < SIZE; j++) {
-				tiles[i][j].setEnabled(true);
-				tiles[i][j].setText("");
-				config[i][j] = '-';
-			}
-		}
-		chooseFirst();
-	}
-	
-	// public void aiTurn(JButton[][] tiles, State state, char c) {
-	// 	State utility = value(state);
-
-	// 	// System.out.println("Value: " + utility.value + "\nRow: " + utility.row + "\nColumn: " + utility.column);
-	// 	tiles[utility.row][utility.column].setText("O");
-	// 	tiles[utility.row][utility.column].setEnabled(false);
-	// 	toggle(utility.row, utility.column, c);
+	// public void resetGame () {
+	// 	for (int i = 0; i < SIZE; i++) {
+	// 		for (int j = 0; j < SIZE; j++) {
+	// 			tiles[i][j].setEnabled(true);
+	// 			tiles[i][j].setText("");
+	// 			config[i][j] = '-';
+	// 		}
+	// 	}
+	// 	currentPlayer = 'X';
+	// 	chooseFirst();
 	// }
+	
+	public void aiMove(State state) {
+		MinMax minmax = new MinMax();
+		State aiMove = minmax.value(state);
+		
+		int temp = aiMove.getUtility();
+
+		while(true){
+			if (equalBoard(aiMove.getParent(), state) == false) {
+				aiMove = aiMove.getParent();
+				aiMove.setUtility(temp);
+			}
+			break;
+		}
+		// aiMove na yung next state
+		System.out.println("utility:" + aiMove.getUtility());
+		printState(aiMove);
+		updateConfig(aiMove);
+		// switchPlayer();
+	}
 
 }
