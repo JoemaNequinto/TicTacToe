@@ -217,12 +217,9 @@ public class TicTacToe {
 		MinMax minmax = new MinMax();
 		State aiMove = minmax.value(state);
 		
-		int temp = aiMove.getUtility();
-
 		while(true){
 			if (equalBoard(aiMove.getParent(), state) == false) {
 				aiMove = aiMove.getParent();
-				aiMove.setUtility(temp);
 			}
 			break;
 		}

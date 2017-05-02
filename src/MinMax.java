@@ -23,6 +23,7 @@ public class MinMax {
 			if (v.getUtility() > m) {
 				m = v.getUtility();
 				returnState = s;
+				returnState.setUtility(v.getUtility());
 			}
 		}
 		return returnState;
@@ -40,6 +41,7 @@ public class MinMax {
 			if (v.getUtility() < m) {
 				m = v.getUtility();
 				returnState = s;
+				returnState.setUtility(v.getUtility());
 			}
 		}
 		return returnState;
