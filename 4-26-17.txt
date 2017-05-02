@@ -1,0 +1,33 @@
+Alpha-Beta Pruning
+
+
+
+value(s, alpha, beta)
+	if s is terminal : return utility(s)
+	if s is max_node : return max_value(s, alpha, beta)
+	if s is min_node : return min_value(s, alpha, beta)
+
+
+
+max_value(s, alpha, beta)
+	v = -infinity
+	for a, s' in successors(s)
+		v = max(v, value(s, alpha, beta))
+		if (v >= beta) return v
+		alpha = max(alpha, v)
+	return v
+
+
+
+min_value(s, alpha, beta)
+	v = +infinity
+	for a, s' in successors(s)
+		v = min(v, value(s, alpha, beta))
+		if (v <= alpha) return v
+		beta = min(v, beta)
+	return v
+
+
+
+alpha - best value for max_node on the way to the root (init: -infinity)
+beta - best value for min_node on the way to the root (init: +infinity)

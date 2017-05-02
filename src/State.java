@@ -90,7 +90,6 @@ public class State {
 	}
 	public boolean checkRowCol(char c1, char c2, char c3){
 		if (c1 != '-' && (c1 == c2) && (c2 == c3)) {
-			// JOptionPane.showMessageDialog(null, c1 + " wins!");
 			if (c1 == AI) {
 				setUtility(1);
 			} else {

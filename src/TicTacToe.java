@@ -57,14 +57,16 @@ public class TicTacToe {
 				tiles[a][b].addActionListener(new ActionListener () {
 					public void actionPerformed (ActionEvent e) {
 						
+						// Player Turn
 						tiles[a][b].setEnabled(false);
 						tiles[a][b].setText(String.valueOf(currentPlayer));
 						toggle(a, b, currentPlayer);
 						switchPlayer();
+						// AI Turn
 						State state = new State(config, currentPlayer, AI);
-						printState(state);
 						aiMove(state);
 						switchPlayer();
+					
 					}
 				});
 
@@ -84,16 +86,6 @@ public class TicTacToe {
 		chooseFirst();
 	}
 
-	public void printState(State state){
-		System.out.println();
-		for (int i = 0; i < SIZE; i++) {
-			for (int j = 0; j < SIZE; j++) {
-				System.out.print(state.getBoard()[i][j]);
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
 	public void createAndShowGUI () {
 		JFrame frame = new JFrame("TicTacToe");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -108,11 +100,10 @@ public class TicTacToe {
 		String[] options = {"Player", "AI"};
 
 		int n = JOptionPane.showOptionDialog(null, "Who'll start?", "Choose Your Turn!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-		System.out.println(n);
+		
 		if (n == -1) System.exit(0);
 		else if (n == 1) {
 			// AI first turn
-			
 			AI = 'X';
 			PLAYER = 'O';
 			currentPlayer = AI;
@@ -183,7 +174,11 @@ public class TicTacToe {
 	}
 	public boolean checkRowCol(char c1, char c2, char c3){
 		if (c1 != '-' && (c1 == c2) && (c2 == c3)) {
-			JOptionPane.showMessageDialog(null, c1 + " wins!");
+			if (c1 == AI) {
+				JOptionPane.showMessageDialog(null, c1 + ": AI wins!");
+			} else {
+				JOptionPane.showMessageDialog(null, c1 + ": Player wins!");
+			}
 			return true;
 		}
 		return false;
@@ -209,25 +204,18 @@ public class TicTacToe {
 	// 			config[i][j] = '-';
 	// 		}
 	// 	}
-	// 	currentPlayer = 'X';
 	// 	chooseFirst();
 	// }
 	
 	public void aiMove(State state) {
 		MinMax minmax = new MinMax();
-		State aiMove = minmax.value(state);
+		State aiMove = minmax.value(state, -99999, 99999);
 		
-		while(true){
-			if (equalBoard(aiMove.getParent(), state) == false) {
-				aiMove = aiMove.getParent();
-			}
-			break;
+		while (equalBoard(aiMove.getParent(), state) == false) {
+			aiMove = aiMove.getParent();
 		}
-		// aiMove na yung next state
-		System.out.println("utility:" + aiMove.getUtility());
-		printState(aiMove);
+		
 		updateConfig(aiMove);
-		// switchPlayer();
 	}
 
 }
